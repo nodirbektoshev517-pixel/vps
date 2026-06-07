@@ -1,0 +1,776 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+  <title>Restaurant Story Menu Prototype</title>
+  <style>
+    :root{
+      --gold:#e7bf78;
+      --gold2:#f5dcaa;
+      --bg:#090807;
+      --card:rgba(255,255,255,.09);
+      --line:rgba(255,255,255,.16);
+      --text:#fffaf0;
+      --muted:rgba(255,250,240,.72);
+      --danger:#ff6b6b;
+      --safe:#71f0b9;
+      --shadow:0 24px 70px rgba(0,0,0,.45);
+      --radius:28px;
+      --top-safe:env(safe-area-inset-top,0px);
+      --bottom-safe:env(safe-area-inset-bottom,0px);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:#090807;color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow:hidden}
+    button,input{font:inherit}
+    button{border:0;color:inherit}
+    .app{
+      position:relative;
+      height:100svh;
+      width:100vw;
+      overflow:hidden;
+      background:
+        radial-gradient(circle at 10% 5%, rgba(231,191,120,.20), transparent 35%),
+        radial-gradient(circle at 90% 0%, rgba(151,85,34,.18), transparent 32%),
+        linear-gradient(145deg,#090807,#17110b 55%,#080604);
+    }
+    .bg-hero{
+      position:absolute;inset:0;
+      background-image:
+        linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.86)),
+        url("https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1400&q=80");
+      background-size:cover;background-position:center;
+      transform:scale(1.02);
+      opacity:.7;
+      filter:saturate(1.03) contrast(1.03);
+    }
+    .noise{position:absolute;inset:0;pointer-events:none;opacity:.16;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.38'/%3E%3C/svg%3E")}
+    .home{
+      position:absolute;inset:0;
+      display:flex;flex-direction:column;
+      padding:calc(18px + var(--top-safe)) 16px calc(18px + var(--bottom-safe));
+      gap:14px;
+      transition:transform .55s cubic-bezier(.2,.85,.2,1), opacity .45s ease, filter .45s ease;
+      will-change:transform,opacity,filter;
+    }
+    .app.story-open .home{transform:scale(.96) translateY(22px);opacity:0;filter:blur(14px);pointer-events:none}
+    .brand-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;z-index:2}
+    .logo{
+      display:flex;align-items:center;gap:10px;min-width:0;
+    }
+    .logo-mark{
+      width:42px;height:42px;border-radius:16px;
+      background:linear-gradient(135deg,rgba(231,191,120,.96),rgba(102,58,22,.92));
+      display:grid;place-items:center;
+      box-shadow:0 10px 30px rgba(231,191,120,.18);
+      font-size:22px;
+    }
+    .logo-text{min-width:0}
+    .logo-text b{display:block;font-size:15px;letter-spacing:.6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .logo-text span{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+    .pill{
+      border:1px solid var(--line);
+      background:rgba(0,0,0,.28);
+      backdrop-filter:blur(16px);
+      border-radius:999px;
+      padding:10px 12px;
+      color:var(--gold2);
+      display:flex;align-items:center;gap:7px;
+      box-shadow:0 10px 32px rgba(0,0,0,.22);
+      white-space:nowrap;font-size:12px;
+    }
+    .hero-copy{
+      z-index:2;margin-top:auto;padding:0 2px 0;
+    }
+    .eyebrow{display:inline-flex;gap:8px;align-items:center;border:1px solid rgba(231,191,120,.25);background:rgba(231,191,120,.10);color:var(--gold2);border-radius:999px;padding:9px 11px;font-size:12px;backdrop-filter:blur(14px)}
+    .hero-title{font-family:Georgia,"Times New Roman",serif;font-size:43px;line-height:.96;letter-spacing:-1.2px;margin:14px 0 10px;text-shadow:0 18px 40px rgba(0,0,0,.65)}
+    .hero-sub{font-size:14px;line-height:1.55;color:rgba(255,250,240,.82);max-width:35em;margin:0 0 16px}
+    .cta-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+    .btn{
+      border-radius:18px;padding:14px 13px;
+      background:rgba(255,255,255,.10);
+      border:1px solid rgba(255,255,255,.15);
+      backdrop-filter:blur(16px);
+      color:#fff;
+      box-shadow:0 10px 34px rgba(0,0,0,.24);
+      cursor:pointer;
+      transition:transform .18s ease, background .18s ease;
+      text-align:center;
+      font-weight:700;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .btn:active{transform:scale(.98)}
+    .btn.primary{background:linear-gradient(135deg,var(--gold),#9d642e);color:#1b1004;border-color:rgba(255,255,255,.12)}
+    .btn.ghost{background:rgba(0,0,0,.33)}
+    .section-title{z-index:2;display:flex;justify-content:space-between;align-items:end;margin-top:4px}
+    .section-title h2{font-family:Georgia,"Times New Roman",serif;margin:0;font-size:22px}
+    .section-title small{color:var(--muted)}
+    .categories{
+      z-index:2;
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+      overflow:auto;
+      padding-bottom:5px;
+      scrollbar-width:none;
+    }
+    .categories::-webkit-scrollbar{display:none}
+    .cat-card{
+      min-height:138px;
+      border-radius:26px;
+      overflow:hidden;
+      position:relative;
+      background:#1b1713;
+      cursor:pointer;
+      border:1px solid rgba(255,255,255,.14);
+      box-shadow:0 14px 42px rgba(0,0,0,.22);
+      isolation:isolate;
+      transform:translateZ(0);
+    }
+    .cat-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(1.05) contrast(1.06);transition:transform .55s cubic-bezier(.2,.85,.2,1)}
+    .cat-card:active img{transform:scale(1.06)}
+    .cat-card::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.72));z-index:1}
+    .cat-info{position:absolute;left:13px;right:13px;bottom:12px;z-index:2}
+    .cat-info b{font-size:17px;display:block;text-shadow:0 8px 20px rgba(0,0,0,.55)}
+    .cat-info span{font-size:12px;color:rgba(255,255,255,.76);display:block;margin-top:4px;line-height:1.25}
+    .featured{
+      z-index:2;
+      display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;
+      margin-bottom:4px;
+    }
+    .featured::-webkit-scrollbar{display:none}
+    .mini-dish{
+      min-width:202px;height:102px;border-radius:24px;overflow:hidden;position:relative;border:1px solid rgba(255,255,255,.13);background:#19130e;
+      box-shadow:0 14px 40px rgba(0,0,0,.18);
+    }
+    .mini-dish img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    .mini-dish::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.68),rgba(0,0,0,.12))}
+    .mini-dish div{position:absolute;z-index:1;left:12px;bottom:11px;right:12px}
+    .mini-dish b{display:block;font-size:14px}
+    .mini-dish span{display:block;margin-top:3px;color:var(--gold2);font-size:12px}
+
+    .story{
+      position:absolute;inset:0;z-index:20;
+      background:#050403;
+      opacity:0;pointer-events:none;
+      transform:translateY(24px) scale(1.02);
+      transition:opacity .38s ease, transform .55s cubic-bezier(.2,.85,.2,1);
+      overflow:hidden;
+    }
+    .story.active{opacity:1;pointer-events:auto;transform:translateY(0) scale(1)}
+    .story-bg{
+      position:absolute;inset:-2px;
+      background-size:cover;background-position:center;
+      transform:scale(1.04);
+      transition:background-image .28s ease, transform .55s cubic-bezier(.2,.85,.2,1), opacity .25s ease;
+      filter:saturate(1.08) contrast(1.08);
+      opacity:1;
+    }
+    .story.flash .story-bg{opacity:.62;transform:scale(1.08)}
+    .story-bg::after{
+      content:"";position:absolute;inset:0;
+      background:
+        linear-gradient(180deg,rgba(0,0,0,.62),rgba(0,0,0,.05) 24%,rgba(0,0,0,.16) 48%,rgba(0,0,0,.90) 100%),
+        radial-gradient(circle at 50% 40%,transparent 0,rgba(0,0,0,.42) 100%);
+    }
+    .story-top{
+      position:absolute;left:0;right:0;top:0;
+      padding:calc(12px + var(--top-safe)) 14px 0;
+      z-index:5;
+    }
+    .story-actions{display:flex;align-items:center;gap:9px}
+    .icon-btn{
+      width:42px;height:42px;border-radius:16px;
+      background:rgba(0,0,0,.38);
+      border:1px solid rgba(255,255,255,.17);
+      backdrop-filter:blur(18px);
+      display:grid;place-items:center;
+      cursor:pointer;
+      box-shadow:0 12px 34px rgba(0,0,0,.25);
+      -webkit-tap-highlight-color:transparent;
+    }
+    .cat-title{
+      flex:1;min-width:0;height:42px;border-radius:16px;
+      background:rgba(0,0,0,.28);
+      border:1px solid rgba(255,255,255,.14);
+      backdrop-filter:blur(18px);
+      display:flex;align-items:center;padding:0 12px;gap:9px;
+      overflow:hidden;
+    }
+    .cat-title b{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .progress-row{display:flex;gap:5px;margin-top:12px}
+    .progress-dot{height:3px;flex:1;border-radius:999px;background:rgba(255,255,255,.22);overflow:hidden}
+    .progress-dot.active{background:rgba(255,255,255,.78)}
+    .chips{
+      display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:10px 2px 2px;
+    }
+    .chips::-webkit-scrollbar{display:none}
+    .chip{
+      flex:0 0 auto;
+      border-radius:999px;
+      padding:9px 12px;
+      background:rgba(0,0,0,.31);
+      border:1px solid rgba(255,255,255,.14);
+      color:rgba(255,250,240,.78);
+      backdrop-filter:blur(16px);
+      font-size:12px;
+      cursor:pointer;
+    }
+    .chip.active{background:rgba(231,191,120,.92);color:#211205;border-color:rgba(255,255,255,.12);font-weight:800}
+    .dish-copy{
+      position:absolute;left:0;right:0;bottom:0;z-index:4;
+      padding:0 16px calc(18px + var(--bottom-safe));
+      transition:transform .35s ease, opacity .35s ease;
+    }
+    .story.flash .dish-copy{opacity:.15;transform:translateY(12px)}
+    .gallery-indicator{display:flex;gap:6px;margin-bottom:13px}
+    .gallery-indicator i{width:22px;height:3px;border-radius:99px;background:rgba(255,255,255,.25)}
+    .gallery-indicator i.active{background:var(--gold2)}
+    .dish-badges{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
+    .badge{font-size:11px;border-radius:999px;padding:7px 9px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(14px);color:rgba(255,255,255,.86)}
+    .badge.gold{background:rgba(231,191,120,.18);color:var(--gold2);border-color:rgba(231,191,120,.35)}
+    .dish-name{font-family:Georgia,"Times New Roman",serif;font-size:39px;line-height:.96;letter-spacing:-.9px;margin:0 0 10px;text-shadow:0 16px 38px rgba(0,0,0,.65)}
+    .dish-desc{margin:0 0 13px;color:rgba(255,250,240,.82);font-size:14px;line-height:1.5;max-width:38em}
+    .dish-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:13px}
+    .meta{border-radius:999px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.14);padding:8px 10px;color:rgba(255,255,255,.83);font-size:12px;backdrop-filter:blur(14px)}
+    .price{font-size:22px;font-weight:900;color:var(--gold2);text-shadow:0 12px 28px rgba(0,0,0,.5)}
+    .story-cta{display:grid;grid-template-columns:1.15fr .85fr;gap:10px}
+    .story-cta .btn{padding:14px 10px;border-radius:18px}
+    .hint{
+      position:absolute;right:14px;top:49%;z-index:5;
+      display:flex;flex-direction:column;align-items:center;gap:8px;
+      transform:translateY(-50%);
+      color:rgba(255,255,255,.68);
+      font-size:11px;text-align:center;pointer-events:none;
+    }
+    .hint div{width:34px;height:58px;border-radius:999px;border:1px solid rgba(255,255,255,.23);display:grid;place-items:center;background:rgba(0,0,0,.20);backdrop-filter:blur(10px)}
+    .toast{
+      position:absolute;left:50%;bottom:calc(92px + var(--bottom-safe));z-index:50;
+      transform:translateX(-50%) translateY(18px);
+      opacity:0;pointer-events:none;
+      background:rgba(12,11,10,.86);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(16px);
+      color:#fff;padding:12px 14px;border-radius:999px;box-shadow:0 18px 55px rgba(0,0,0,.35);
+      transition:.25s ease;white-space:nowrap;font-size:13px;
+    }
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .cart-float{
+      position:absolute;right:14px;bottom:calc(15px + var(--bottom-safe));z-index:30;
+      min-width:58px;height:50px;border-radius:18px;background:linear-gradient(135deg,var(--gold),#9d642e);color:#1b1004;
+      display:flex;align-items:center;justify-content:center;gap:7px;font-weight:900;box-shadow:0 18px 55px rgba(0,0,0,.40);border:1px solid rgba(255,255,255,.22);
+    }
+    .cart-float span{display:inline-grid;place-items:center;min-width:22px;height:22px;border-radius:99px;background:rgba(0,0,0,.20)}
+    .empty{
+      position:absolute;inset:0;display:grid;place-items:center;padding:25px;text-align:center;color:var(--muted);
+    }
+    .desktop-note{
+      position:absolute;left:14px;bottom:calc(15px + var(--bottom-safe));z-index:30;
+      color:rgba(255,255,255,.57);font-size:11px;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.10);border-radius:999px;padding:9px 10px;backdrop-filter:blur(12px)
+    }
+    @media (min-width:760px){
+      body{display:grid;place-items:center;background:#1a120c}
+      .app{width:430px;height:min(900px,100svh);border-radius:34px;box-shadow:0 25px 90px rgba(0,0,0,.55);overflow:hidden}
+      .hero-title{font-size:46px}
+      .desktop-note{display:block}
+    }
+    @media (max-width:420px){
+      .hero-title{font-size:39px}
+      .dish-name{font-size:35px}
+      .cat-card{min-height:126px}
+    }
+    @media (max-height:700px){
+      .featured{display:none}
+      .hero-title{font-size:36px;margin-top:11px}
+      .categories{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .cat-card{min-height:110px}
+      .dish-name{font-size:32px}
+      .dish-desc{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    }
+  </style>
+</head>
+<body>
+  <main class="app" id="app">
+    <div class="bg-hero"></div>
+    <div class="noise"></div>
+
+    <section class="home" id="home">
+      <div class="brand-bar">
+        <div class="logo">
+          <div class="logo-mark">🍽️</div>
+          <div class="logo-text">
+            <b>Samarqand Palace</b>
+            <span>Restaurant • Story Menu</span>
+          </div>
+        </div>
+        <button class="pill" id="openFirst">✨ Chef tavsiyasi</button>
+      </div>
+
+      <div class="hero-copy">
+        <span class="eyebrow">Bugun kechki ovqatni unutilmas qiling</span>
+        <h1 class="hero-title">Taomni avval ko‘z bilan tanlang.</h1>
+        <p class="hero-sub">Kategoriya tanlang, keyin TikTok uslubida taomlarni barmoq bilan surib ko‘ring. Yonga sursangiz — joriy taomning boshqa pozalari ochiladi.</p>
+        <div class="cta-row">
+          <button class="btn primary" id="openMenu">Menyuni ko‘rish</button>
+          <button class="btn ghost" onclick="showToast('Stol band qilish keyingi bosqichda ulanadi')">Stol band qilish</button>
+        </div>
+      </div>
+
+      <div class="section-title">
+        <h2>Bugungi tavsiyalar</h2>
+        <small>surib ko‘ring</small>
+      </div>
+      <div class="featured" id="featured"></div>
+
+      <div class="section-title">
+        <h2>Kategoriyalar</h2>
+        <small>tanlang</small>
+      </div>
+      <div class="categories" id="categories"></div>
+    </section>
+
+    <section class="story" id="story" aria-hidden="true">
+      <div class="story-bg" id="storyBg"></div>
+
+      <div class="story-top">
+        <div class="story-actions">
+          <button class="icon-btn" id="closeStory" aria-label="Orqaga">‹</button>
+          <div class="cat-title"><span>🍽️</span><b id="storyCatName">Kategoriya</b></div>
+          <button class="icon-btn" id="helpBtn" aria-label="Yordam">?</button>
+        </div>
+        <div class="progress-row" id="progressRow"></div>
+        <div class="chips" id="chips"></div>
+      </div>
+
+      <div class="hint">
+        <div>↕</div>
+        <span>taomlar</span>
+      </div>
+
+      <div class="dish-copy" id="dishCopy">
+        <div class="gallery-indicator" id="galleryIndicator"></div>
+        <div class="dish-badges" id="dishBadges"></div>
+        <h2 class="dish-name" id="dishName">Taom</h2>
+        <p class="dish-desc" id="dishDesc">Tavsif</p>
+        <div class="dish-meta" id="dishMeta"></div>
+        <div class="story-cta">
+          <button class="btn primary" id="addBtn">Savatga qo‘shish</button>
+          <button class="btn ghost" onclick="showToast('Ofitsiant bilan bog‘lanish keyin ulanadi')">Ofitsiant</button>
+        </div>
+      </div>
+
+      <div class="cart-float" id="cartFloat">🧺 <span id="cartCount">0</span></div>
+      <div class="desktop-note">Desktop: ↑ ↓ taom, ← → rasm</div>
+      <div class="empty" id="emptyState" hidden>Bu kategoriyada hozircha taom yo‘q.</div>
+    </section>
+
+    <div class="toast" id="toast">Tayyor</div>
+  </main>
+
+<script>
+const DATA = {
+  categories: [
+    {
+      id:"chef", name:"Chef tavsiyasi", desc:"Oshpazimiz tanlagan maxsus taomlar",
+      cover:"https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&q=80"
+    },
+    {
+      id:"grill", name:"Grill & Kabob", desc:"Olov va tandirda pishgan taomlar",
+      cover:"https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=900&q=80"
+    },
+    {
+      id:"milliy", name:"Milliy taomlar", desc:"O‘zbekona lazzat va mehmondo‘stlik",
+      cover:"https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=900&q=80"
+    },
+    {
+      id:"dessert", name:"Desertlar", desc:"Kechki ovqatni shirin yakunlang",
+      cover:"https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?auto=format&fit=crop&w=900&q=80"
+    },
+    {
+      id:"drinks", name:"Ichimliklar", desc:"Choy, limonad, qahva va kokteyllar",
+      cover:"https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=900&q=80"
+    },
+    {
+      id:"salad", name:"Salatlar", desc:"Yengil, yangi va rang-barang",
+      cover:"https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=900&q=80"
+    }
+  ],
+  dishes: [
+    {
+      id:"d1", category_id:"chef", name:"Signature Steak", price:155000, portion:"420 g", prep:"28 daqiqa",
+      badges:["chef_choice","premium"],
+      desc:"Yumshoq mol go‘shti, rozmarin va sariyog‘ bilan sekin qovurilgan. Ustiga maxsus sous tortiladi.",
+      images:[
+        "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=1200&q=84",
+        "https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=1200&q=84",
+        "https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=1200&q=84"
+      ]
+    },
+    {
+      id:"d2", category_id:"chef", name:"Oshpaz Seti", price:129000, portion:"2 kishi", prep:"22 daqiqa",
+      badges:["recommended","family"],
+      desc:"Issiq taom, salat va ichimlikdan iborat maxsus set. Birinchi marta kelgan mehmonlar uchun ideal tanlov.",
+      images:[
+        "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=1200&q=84",
+        "https://images.unsplash.com/photo-1543352634-a1c51d9f1fa7?auto=format&fit=crop&w=1200&q=84"
+      ]
+    },
+    {
+      id:"d3", category_id:"grill", name:"Tandir Kabob", price:89000, portion:"350 g", prep:"35 daqiqa",
+      badges:["halal","hot"],
+      desc:"Qo‘y go‘shti tandirda yumshoq pishiriladi, yangi piyoz va ko‘katlar bilan tortiladi.",
+      images:[
+        "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?auto=format&fit=crop&w=1200&q=84",
+        "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=84"
+      ]
+    },
+    {
+      id:"d4", category_id:"grill", name:"Grill Tovuq", price:64000, portion:"300 g", prep:"24 daqiqa",
+      badges:["juicy"],
+      desc:"Tovuq filesi ziravorli marinadda damlanadi va olovda tillarang bo‘lguncha pishiriladi.",
+      images:[
+        "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?auto=format&fit=crop&w=1200&q=84",
+        "https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=1200&q=84"
+      ]
+    },
+    {
+      id:"d5", category_id:"milliy", name:"Samarqand Osh", price:48000, portion:"1 porsiya", prep:"18 daqiqa",
+      badges:["national","popular"],
+      desc:"Sabzi, guruch va go‘sht muvozanati bilan tayyorlangan klassik osh. Har luqmada tanish lazzat.",
+      images:[
+        "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=1200&q=84",
+        "https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=1200&q=84"
+      ]
+    },
+    {
+      id:"d6", category_id:"milliy", name:"Manti", price:42000, portion:"5 dona", prep:"20 daqiqa",
+      badges:["soft","home_style"],
+      desc:"Yupqa xamir ichida shirali go‘sht. Qatiq va ko‘katlar bilan yanada mazali.",
+      images:[
+        "https://images.unsplash.com/photo-1496116218417-1a781b1c416c?auto=format&fit=crop&w=1200&q=84",
+        "https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=1200&q=84"
+      ]
+    },
+    {
+      id:"d7", category_id:"dessert", name:"Shokolad Fondan", price:39000, portion:"1 dona", prep:"12 daqiqa",
+      badges:["sweet","premium"],
+      desc:"Ichidan iliq shokolad oqib chiqadigan nafis desert. Vanilli muzqaymoq bilan tortiladi.",
+      images:[
+        "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=1200&q=84",
+        "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?auto=format&fit=crop&w=1200&q=84"
+      ]
+    },
+    {
+      id:"d8", category_id:"dessert", name:"Berry Cheesecake", price:36000, portion:"1 kesim", prep:"5 daqiqa",
+      badges:["fresh"],
+      desc:"Yengil krem, rezavor mevalar va mayin pechenye asosi. Choy bilan juda mos.",
+      images:[
+        "https://images.unsplash.com/photo-1533134242443-d4fd215305ad?auto=format&fit=crop&w=1200&q=84",
+        "https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=1200&q=84"
+      ]
+    },
+    {
+      id:"d9", category_id:"drinks", name:"Uy limonadi", price:24000, portion:"450 ml", prep:"4 daqiqa",
+      badges:["cold","fresh"],
+      desc:"Limon, yalpiz va gazli suv bilan tayyorlangan tetiklantiruvchi ichimlik.",
+      images:[
+        "https://images.unsplash.com/photo-1621263764928-df1444c5e859?auto=format&fit=crop&w=1200&q=84",
+        "https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=1200&q=84"
+      ]
+    },
+    {
+      id:"d10", category_id:"drinks", name:"Marokash choyi", price:18000, portion:"choynak", prep:"7 daqiqa",
+      badges:["warm"],
+      desc:"Yalpizli xushbo‘y choy. Suhbat va kechki ovqat uchun sokin yakun.",
+      images:[
+        "https://images.unsplash.com/photo-1571934811356-5cc061b6821f?auto=format&fit=crop&w=1200&q=84",
+        "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=1200&q=84"
+      ]
+    },
+    {
+      id:"d11", category_id:"salad", name:"Avokado salat", price:52000, portion:"260 g", prep:"9 daqiqa",
+      badges:["light","fresh"],
+      desc:"Avokado, pomidor, ko‘katlar va zaytun yog‘i bilan tayyorlangan yengil salat.",
+      images:[
+        "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=1200&q=84",
+        "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1200&q=84"
+      ]
+    },
+    {
+      id:"d12", category_id:"salad", name:"Caesar Royal", price:47000, portion:"300 g", prep:"11 daqiqa",
+      badges:["classic"],
+      desc:"Tovuq filesi, parmezan, qarsildoq non va maxsus sous bilan klassik Caesar.",
+      images:[
+        "https://images.unsplash.com/photo-1550304943-4f24f54ddde9?auto=format&fit=crop&w=1200&q=84",
+        "https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?auto=format&fit=crop&w=1200&q=84"
+      ]
+    }
+  ]
+};
+
+const app = document.getElementById('app');
+const categoriesEl = document.getElementById('categories');
+const featuredEl = document.getElementById('featured');
+const story = document.getElementById('story');
+const storyBg = document.getElementById('storyBg');
+const storyCatName = document.getElementById('storyCatName');
+const progressRow = document.getElementById('progressRow');
+const chips = document.getElementById('chips');
+const dishBadges = document.getElementById('dishBadges');
+const dishName = document.getElementById('dishName');
+const dishDesc = document.getElementById('dishDesc');
+const dishMeta = document.getElementById('dishMeta');
+const galleryIndicator = document.getElementById('galleryIndicator');
+const addBtn = document.getElementById('addBtn');
+const cartCount = document.getElementById('cartCount');
+const emptyState = document.getElementById('emptyState');
+const toast = document.getElementById('toast');
+
+let state = {
+  categoryId: DATA.categories[0].id,
+  dishIndex: 0,
+  imageIndex: 0,
+  cart: 0,
+  touchStartX: 0,
+  touchStartY: 0,
+  touchMoved: false,
+  switching: false
+};
+
+function money(v){
+  return new Intl.NumberFormat('uz-UZ').format(v) + " so‘m";
+}
+function dishesFor(catId){
+  return DATA.dishes.filter(d=>d.category_id===catId);
+}
+function categoryById(id){
+  return DATA.categories.find(c=>c.id===id) || DATA.categories[0];
+}
+function activeDishes(){
+  return dishesFor(state.categoryId);
+}
+function activeDish(){
+  return activeDishes()[state.dishIndex];
+}
+function imgUrl(url){
+  return `url("${url}")`;
+}
+function badgeLabel(b){
+  const map = {
+    chef_choice:"Oshpaz tanlovi", premium:"Premium", recommended:"Tavsiya", family:"Oilaviy",
+    halal:"Halal", hot:"Achchiq", juicy:"Shirali", national:"Milliy", popular:"Mashhur",
+    soft:"Yumshoq", home_style:"Uy ta’mi", sweet:"Shirin", fresh:"Yangi", cold:"Sovuq",
+    warm:"Issiq", light:"Yengil", classic:"Klassik"
+  };
+  return map[b] || b;
+}
+function renderHome(){
+  categoriesEl.innerHTML = DATA.categories.map(c=>`
+    <button class="cat-card" data-cat="${c.id}">
+      <img src="${c.cover}" alt="${c.name}" loading="lazy">
+      <div class="cat-info"><b>${c.name}</b><span>${c.desc}</span></div>
+    </button>
+  `).join('');
+
+  const feats = DATA.dishes.filter(d=>d.badges.includes("chef_choice") || d.badges.includes("recommended") || d.badges.includes("popular")).slice(0,5);
+  featuredEl.innerHTML = feats.map(d=>`
+    <button class="mini-dish" data-dish="${d.id}">
+      <img src="${d.images[0]}" alt="${d.name}" loading="lazy">
+      <div><b>${d.name}</b><span>${money(d.price)}</span></div>
+    </button>
+  `).join('');
+
+  categoriesEl.querySelectorAll('[data-cat]').forEach(btn=>{
+    btn.addEventListener('click',()=>openStory(btn.dataset.cat,0));
+  });
+  featuredEl.querySelectorAll('[data-dish]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const d = DATA.dishes.find(x=>x.id===btn.dataset.dish);
+      const list = dishesFor(d.category_id);
+      openStory(d.category_id, list.findIndex(x=>x.id===d.id));
+    });
+  });
+}
+function renderChips(){
+  chips.innerHTML = DATA.categories.map(c=>`
+    <button class="chip ${c.id===state.categoryId?'active':''}" data-cat="${c.id}">${c.name}</button>
+  `).join('');
+  chips.querySelectorAll('[data-cat]').forEach(ch=>{
+    ch.addEventListener('click',()=>switchCategory(ch.dataset.cat));
+  });
+}
+function renderStory({animate=true}={}){
+  const list = activeDishes();
+  const cat = categoryById(state.categoryId);
+  storyCatName.textContent = cat.name;
+  emptyState.hidden = list.length > 0;
+  if(!list.length) return;
+
+  if(state.dishIndex < 0) state.dishIndex = 0;
+  if(state.dishIndex >= list.length) state.dishIndex = list.length - 1;
+
+  const d = activeDish();
+  if(state.imageIndex >= d.images.length) state.imageIndex = 0;
+
+  if(animate){
+    story.classList.add('flash');
+    setTimeout(()=>story.classList.remove('flash'), 210);
+  }
+
+  storyBg.style.backgroundImage = imgUrl(d.images[state.imageIndex]);
+  dishName.textContent = d.name;
+  dishDesc.textContent = d.desc;
+
+  dishBadges.innerHTML = (d.badges || []).slice(0,4).map((b,i)=>`<span class="badge ${i===0?'gold':''}">${badgeLabel(b)}</span>`).join('');
+  dishMeta.innerHTML = `
+    <span class="price">${money(d.price)}</span>
+    <span class="meta">🍽 ${d.portion}</span>
+    <span class="meta">⏱ ${d.prep}</span>
+  `;
+
+  galleryIndicator.innerHTML = d.images.map((_,i)=>`<i class="${i===state.imageIndex?'active':''}"></i>`).join('');
+  progressRow.innerHTML = list.map((_,i)=>`<div class="progress-dot ${i===state.dishIndex?'active':''}"></div>`).join('');
+  renderChips();
+  preloadNear();
+}
+function openStory(catId, index=0){
+  state.categoryId = catId;
+  state.dishIndex = Math.max(0,index || 0);
+  state.imageIndex = 0;
+  app.classList.add('story-open');
+  story.classList.add('active');
+  story.setAttribute('aria-hidden','false');
+  document.body.style.overscrollBehavior = 'none';
+  renderStory({animate:false});
+}
+function closeStory(){
+  story.classList.remove('active');
+  app.classList.remove('story-open');
+  story.setAttribute('aria-hidden','true');
+}
+function switchCategory(catId){
+  if(catId===state.categoryId || state.switching) return;
+  state.switching = true;
+  story.classList.add('flash');
+  setTimeout(()=>{
+    state.categoryId = catId;
+    state.dishIndex = 0;
+    state.imageIndex = 0;
+    renderStory({animate:false});
+    setTimeout(()=>{ story.classList.remove('flash'); state.switching=false; }, 120);
+  }, 170);
+}
+function nextDish(delta){
+  const list = activeDishes();
+  if(!list.length) return;
+  const next = state.dishIndex + delta;
+  if(next < 0){
+    showToast("Kategoriya boshiga yetdingiz");
+    return;
+  }
+  if(next >= list.length){
+    showToast("Kategoriya oxiri. Yuqoridan boshqa kategoriya tanlang");
+    return;
+  }
+  state.dishIndex = next;
+  state.imageIndex = 0;
+  renderStory();
+}
+function nextImage(delta){
+  const d = activeDish();
+  if(!d || d.images.length <= 1){
+    showToast("Bu taomda boshqa rasm yo‘q");
+    return;
+  }
+  let next = state.imageIndex + delta;
+  if(next < 0) next = d.images.length - 1;
+  if(next >= d.images.length) next = 0;
+  state.imageIndex = next;
+  renderStory();
+}
+function addToCart(){
+  const d = activeDish();
+  if(!d) return;
+  state.cart++;
+  cartCount.textContent = state.cart;
+  showToast(`${d.name} savatga qo‘shildi`);
+}
+function showToast(text){
+  toast.textContent = text;
+  toast.classList.add('show');
+  clearTimeout(showToast.t);
+  showToast.t = setTimeout(()=>toast.classList.remove('show'), 1800);
+}
+function preloadNear(){
+  const list = activeDishes();
+  const urls = [];
+  const d = activeDish();
+  if(d){
+    urls.push(d.images[state.imageIndex]);
+    if(d.images[state.imageIndex+1]) urls.push(d.images[state.imageIndex+1]);
+  }
+  if(list[state.dishIndex+1]) urls.push(list[state.dishIndex+1].images[0]);
+  if(list[state.dishIndex-1]) urls.push(list[state.dishIndex-1].images[0]);
+  urls.forEach(src=>{
+    const im = new Image();
+    im.src = src;
+  });
+}
+
+document.getElementById('closeStory').addEventListener('click',closeStory);
+document.getElementById('helpBtn').addEventListener('click',()=>showToast("↕ taomlar, ↔ rasmlar, yuqoridan kategoriya"));
+document.getElementById('openMenu').addEventListener('click',()=>openStory(DATA.categories[0].id,0));
+document.getElementById('openFirst').addEventListener('click',()=>openStory(DATA.categories[0].id,0));
+addBtn.addEventListener('click',addToCart);
+
+story.addEventListener('touchstart', e=>{
+  const t = e.touches[0];
+  state.touchStartX = t.clientX;
+  state.touchStartY = t.clientY;
+  state.touchMoved = false;
+}, {passive:true});
+
+story.addEventListener('touchmove', e=>{
+  state.touchMoved = true;
+}, {passive:true});
+
+story.addEventListener('touchend', e=>{
+  const t = e.changedTouches[0];
+  const dx = t.clientX - state.touchStartX;
+  const dy = t.clientY - state.touchStartY;
+  const absX = Math.abs(dx);
+  const absY = Math.abs(dy);
+  if(Math.max(absX,absY) < 42) return;
+
+  if(absY > absX){
+    if(dy < 0) nextDish(1);
+    else nextDish(-1);
+  }else{
+    if(dx < 0) nextImage(1);
+    else nextImage(-1);
+  }
+}, {passive:true});
+
+let wheelLock = false;
+story.addEventListener('wheel', e=>{
+  if(wheelLock) return;
+  wheelLock = true;
+  setTimeout(()=>wheelLock=false, 520);
+  if(Math.abs(e.deltaY) > Math.abs(e.deltaX)){
+    nextDish(e.deltaY > 0 ? 1 : -1);
+  }else{
+    nextImage(e.deltaX > 0 ? 1 : -1);
+  }
+},{passive:true});
+
+window.addEventListener('keydown', e=>{
+  if(!story.classList.contains('active')) return;
+  if(e.key === 'Escape') closeStory();
+  if(e.key === 'ArrowDown') nextDish(1);
+  if(e.key === 'ArrowUp') nextDish(-1);
+  if(e.key === 'ArrowRight') nextImage(1);
+  if(e.key === 'ArrowLeft') nextImage(-1);
+});
+
+renderHome();
+</script>
+</body>
+</html>
